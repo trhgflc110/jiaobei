@@ -1,662 +1,236 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0b1020" />
-<title>線上擲筊｜儀式感版本</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jiaobei Divination Experience</title>
+
 <style>
-  :root{
-    --bg1:#070b16;
-    --bg2:#111b3a;
-    --gold:#f6d27a;
-    --gold2:#d9a94b;
-    --ink:#e9ecff;
-    --muted:rgba(233,236,255,.72);
-    --card:rgba(255,255,255,.06);
-    --shadow:0 18px 50px rgba(0,0,0,.45);
-  }
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family: "Helvetica Neue", system-ui, sans-serif;
+  background:url("backgorund.jpg") no-repeat center center;
+  background-size:cover;
+  color:white;
+  overflow:hidden;
+}
 
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    min-height:100svh;
-    color:var(--ink);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(246,210,122,.18), transparent 55%),
-      radial-gradient(900px 700px at 15% 30%, rgba(120,160,255,.18), transparent 55%),
-      radial-gradient(900px 700px at 85% 55%, rgba(255,120,210,.10), transparent 60%),
-      linear-gradient(180deg, var(--bg1), var(--bg2));
-    overflow-x:hidden;
-  }
+/* dark overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(4px);
+}
 
-  /* ⭐ subtle particles */
-  .stars{
-    position:fixed; inset:0;
-    pointer-events:none;
-    opacity:.35;
-    background-image:
-      radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,.55), transparent 60%),
-      radial-gradient(1px 1px at 120px 80px, rgba(255,255,255,.35), transparent 60%),
-      radial-gradient(1.5px 1.5px at 220px 140px, rgba(255,255,255,.4), transparent 60%),
-      radial-gradient(1px 1px at 340px 60px, rgba(255,255,255,.3), transparent 60%),
-      radial-gradient(2px 2px at 480px 160px, rgba(255,255,255,.4), transparent 60%);
-    background-size: 560px 220px;
-    animation: drift 18s linear infinite;
-    filter: blur(.15px);
-  }
-  @keyframes drift{ from{transform:translateY(0)} to{transform:translateY(40px)} }
+/* main layout */
+.container{
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:20px;
+}
 
-  /* 🐎 Horse watermark background (upload horse.jpg to repo root) */
-  .horse-bg{
-    position:fixed; inset:0;
-    pointer-events:none;
-    background-image: url("horse.jpg");
-    background-repeat:no-repeat;
-    background-position: 78% 18%;
-    background-size: min(560px, 72vw);
-    opacity: .10;
-    filter: saturate(1.05) contrast(1.05) drop-shadow(0 30px 60px rgba(0,0,0,.45));
-    transform: rotate(-6deg);
-  }
+/* title */
+.title{
+  font-size:28px;
+  letter-spacing:2px;
+  margin-bottom:4px;
+}
 
-  .wrap{
-    width:min(980px, 92vw);
-    margin:0 auto;
-    padding: clamp(18px, 5vw, 36px) 0 56px;
-    position:relative;
-    z-index:1;
-  }
+.subtitle{
+  font-size:14px;
+  opacity:0.8;
+  margin-bottom:40px;
+}
 
-  header{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:18px;
-    margin: 10px 0 18px;
-  }
-  .brand{ display:flex; flex-direction:column; gap:8px; }
-  .title{
-    font-size: clamp(28px, 4.2vw, 42px);
-    letter-spacing:.06em;
-    margin:0;
-    text-shadow: 0 10px 30px rgba(0,0,0,.5);
-  }
-  .subtitle{
-    margin:0;
-    color:var(--muted);
-    line-height:1.6;
-    max-width: 48ch;
-  }
-  .badge{
-    align-self:flex-start;
-    padding:10px 12px;
-    border:1px solid rgba(246,210,122,.25);
-    border-radius:14px;
-    background: rgba(255,255,255,.05);
-    box-shadow: var(--shadow);
-    color: rgba(246,210,122,.92);
-    font-size: 13px;
-    letter-spacing:.06em;
-    backdrop-filter: blur(10px);
-  }
+/* rune circle */
+.rune{
+  position:absolute;
+  width:280px;
+  height:280px;
+  border-radius:50%;
+  border:2px solid rgba(255,215,120,0.7);
+  box-shadow:0 0 40px rgba(255,215,120,0.6);
+  animation:spin 8s linear infinite;
+  opacity:0;
+}
 
-  .grid{
-    display:grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap:18px;
-  }
-  @media (max-width: 860px){ .grid{grid-template-columns: 1fr; } }
+.rune.active{
+  opacity:1;
+}
 
-  .card{
-    background: rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.10);
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(14px);
-  }
-  .main{
-    padding: 20px;
-    position:relative;
-    overflow:hidden;
-  }
-  .main:before{
-    content:"";
-    position:absolute; inset:-2px;
-    background: radial-gradient(700px 240px at 50% 0%, rgba(246,210,122,.10), transparent 60%);
-    pointer-events:none;
-  }
+@keyframes spin{
+  from{ transform:rotate(0deg);}
+  to{ transform:rotate(360deg);}
+}
 
-  .ritual{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-    padding: 12px 12px 16px;
-    border:1px solid rgba(246,210,122,.12);
-    border-radius:16px;
-    background: rgba(0,0,0,.16);
-  }
+/* cups */
+.cups{
+  display:flex;
+  gap:40px;
+  align-items:flex-end;
+  margin-bottom:40px;
+}
 
-  .qbox{ flex:1; }
-  label{
-    display:block;
-    font-size: 13px;
-    letter-spacing:.08em;
-    color: rgba(246,210,122,.9);
-    margin: 0 0 8px;
-  }
-  input{
-    width:100%;
-    padding: 12px 12px;
-    border-radius: 14px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(10,12,24,.55);
-    color: var(--ink);
-    outline:none;
-    font-size: 15px;
-  }
-  input::placeholder{ color: rgba(233,236,255,.45); }
+.cup{
+  width:130px;
+  height:130px;
+  transition:transform 1s cubic-bezier(.2,.8,.2,1);
+}
 
-  .controls{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top: 14px;
-    align-items:center;
-  }
-  button{
-    border:1px solid rgba(246,210,122,.35);
-    background: linear-gradient(180deg, rgba(246,210,122,.22), rgba(246,210,122,.08));
-    color: rgba(246,210,122,.95);
-    padding: 12px 16px;
-    border-radius: 14px;
-    font-weight: 700;
-    letter-spacing:.08em;
-    cursor:pointer;
-    transition: transform .12s ease, filter .12s ease;
-    user-select:none;
-  }
-  button:hover{ transform: translateY(-1px); filter: brightness(1.08); }
-  button:active{ transform: translateY(0px) scale(.99); filter: brightness(.98); }
+.cup img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
 
-  .toggle{
-    display:flex; gap:10px; align-items:center;
-    color: var(--muted);
-    font-size: 14px;
-    margin-left:auto;
-  }
-  .toggle input{ width:auto; accent-color: var(--gold); }
+.throw{
+  animation:flip 1s ease;
+}
 
-  .stage{
-    margin-top: 16px;
-    padding: 18px 14px 16px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.22);
-    position:relative;
-    overflow:hidden;
-  }
-  .stage:after{
-    content:"";
-    position:absolute; left:0; right:0; bottom:-1px; height:42px;
-    background: radial-gradient(140px 40px at 50% 100%, rgba(246,210,122,.22), transparent 70%);
-    pointer-events:none;
-  }
+@keyframes flip{
+  0%{ transform:rotate(0deg) translateY(0);}
+  40%{ transform:rotate(240deg) translateY(-50px);}
+  100%{ transform:rotate(360deg) translateY(0);}
+}
 
-  .cup-row{
-    display:flex;
-    justify-content:center;
-    gap: clamp(10px, 3vw, 18px);
-    align-items:flex-end;
-    padding: 10px 0 6px;
-    min-height: 240px;
-    position:relative;
-  }
+/* result */
+.result{
+  font-size:24px;
+  font-weight:600;
+  margin-bottom:8px;
+}
 
-  /* ✨ Rune ring overlay */
-  .runes{
-    position:absolute;
-    left:50%;
-    top: 40%;
-    transform: translate(-50%,-50%);
-    width: min(360px, 86vw);
-    aspect-ratio: 1/1;
-    border-radius: 999px;
-    pointer-events:none;
-    opacity: 0;
-    filter: drop-shadow(0 18px 50px rgba(0,0,0,.35));
-  }
-  .runes::before{
-    content:"";
-    position:absolute; inset:0;
-    border-radius:999px;
-    background:
-      radial-gradient(circle at 50% 50%, rgba(246,210,122,.24), transparent 56%),
-      conic-gradient(from 0deg,
-        rgba(246,210,122,.0),
-        rgba(246,210,122,.55),
-        rgba(246,210,122,.0),
-        rgba(246,210,122,.45),
-        rgba(246,210,122,.0)
-      );
-    mask: radial-gradient(circle at 50% 50%, transparent 57%, black 58%, black 64%, transparent 65%);
-  }
-  .runes svg{ position:absolute; inset:0; width:100%; height:100%; }
+.result-en{
+  font-size:14px;
+  opacity:0.8;
+  margin-bottom:30px;
+}
 
-  .runes.on{
-    opacity: 1;
-    animation: runePulse 1.6s ease-in-out infinite;
-  }
-  @keyframes runePulse{
-    0%   { transform: translate(-50%,-50%) scale(.98); filter: drop-shadow(0 10px 35px rgba(246,210,122,.18)); }
-    50%  { transform: translate(-50%,-50%) scale(1.02); filter: drop-shadow(0 16px 55px rgba(246,210,122,.26)); }
-    100% { transform: translate(-50%,-50%) scale(.98); filter: drop-shadow(0 10px 35px rgba(246,210,122,.18)); }
-  }
-  .runes.spin{ animation: runeSpin 4.6s linear infinite; }
-  @keyframes runeSpin{
-    from { transform: translate(-50%,-50%) rotate(0deg); }
-    to   { transform: translate(-50%,-50%) rotate(360deg); }
-  }
+/* button */
+button{
+  padding:16px 48px;
+  font-size:18px;
+  border:none;
+  border-radius:40px;
+  background:linear-gradient(45deg,#d9a94b,#f6d27a);
+  color:black;
+  font-weight:bold;
+  letter-spacing:1px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
 
-  .cup{
-    width: min(220px, 40vw);
-    aspect-ratio: 1 / 1;
-    filter: drop-shadow(0 20px 40px rgba(0,0,0,.45));
-    transform-origin: 50% 80%;
-  }
-  .throwing{ animation: toss 1.05s cubic-bezier(.18,.8,.22,1) both; }
-  @keyframes toss{
-    0%   { transform: translateY(0) rotate(0deg) scale(1); }
-    15%  { transform: translateY(-18px) rotate(30deg) scale(1.02); }
-    40%  { transform: translateY(-70px) rotate(220deg) scale(1.05); }
-    70%  { transform: translateY(8px) rotate(360deg) scale(1.0); }
-    82%  { transform: translateY(-6px) rotate(360deg) scale(1.0); }
-    100% { transform: translateY(0) rotate(360deg) scale(1); }
-  }
-
-  .result{
-    text-align:center;
-    margin: 10px 0 0;
-    font-size: clamp(18px, 2.4vw, 22px);
-    letter-spacing:.06em;
-    color: rgba(233,236,255,.92);
-  }
-  .result strong{ color: var(--gold); }
-
-  .chips{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    justify-content:center;
-    margin-top: 10px;
-  }
-  .chip{
-    font-size: 12px;
-    padding: 7px 10px;
-    border-radius: 999px;
-    border:1px solid rgba(246,210,122,.22);
-    background: rgba(255,255,255,.05);
-    color: rgba(246,210,122,.9);
-    letter-spacing:.06em;
-  }
-
-  .side{ padding: 16px; }
-  .side h2{
-    margin: 4px 0 10px;
-    font-size: 16px;
-    letter-spacing:.08em;
-    color: rgba(246,210,122,.95);
-  }
-  .hint{
-    margin: 0 0 14px;
-    color: var(--muted);
-    line-height:1.7;
-    font-size: 14px;
-  }
-  .list{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    max-height: 420px;
-    overflow:auto;
-    padding-right: 4px;
-  }
-  .item{
-    border:1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.18);
-    border-radius: 14px;
-    padding: 10px 12px;
-  }
-  .item .q{ color: rgba(233,236,255,.9); font-size: 13px; line-height:1.5; }
-  .item .r{ margin-top:6px; color: rgba(246,210,122,.9); font-weight:700; letter-spacing:.05em; }
-  .meta{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    margin-top:8px;
-    color: rgba(233,236,255,.55);
-    font-size: 12px;
-  }
-  .footer{
-    margin-top: 16px;
-    color: rgba(233,236,255,.45);
-    font-size: 12px;
-    text-align:center;
-    letter-spacing:.04em;
-  }
-
-  .cup svg{ width:100%; height:100%; }
+.footer{
+  position:absolute;
+  bottom:20px;
+  font-size:12px;
+  opacity:0.6;
+}
 </style>
 </head>
 
 <body>
-<div class="stars" aria-hidden="true"></div>
-<div class="horse-bg" aria-hidden="true"></div>
 
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <h1 class="title">🙏 線上擲筊</h1>
-      <p class="subtitle">靜心、誠問、再擲。含木頭落地音效、金色符文光圈、馬紋儀式背景。</p>
-    </div>
-    <div class="badge">JIAOBEI • RITUAL EDITION</div>
-  </header>
+<div class="overlay"></div>
 
-  <div class="grid">
-    <section class="card main">
-      <div class="ritual">
-        <div class="qbox">
-          <label for="question">你的問題（可留空）</label>
-          <input id="question" placeholder="例如：我今天要去嗎？／這個方案可行嗎？" maxlength="80" />
-          <div class="controls">
-            <button id="btnThrow">擲筊</button>
-            <button id="btnClear" title="清空紀錄">清空</button>
+<div class="container">
 
-            <div class="toggle">
-              <label style="margin:0; color: rgba(233,236,255,.7); letter-spacing:0;">音效</label>
-              <input id="soundToggle" type="checkbox" checked />
-            </div>
-          </div>
-        </div>
-      </div>
+<div class="title">擲筊儀式體驗</div>
+<div class="subtitle">Jiaobei Divination Experience</div>
 
-      <div class="stage">
-        <div class="cup-row" aria-label="擲筊動畫區">
-          <div class="runes" id="runes" aria-hidden="true">
-            <!-- rune symbols ring -->
-            <svg viewBox="0 0 100 100">
-              <defs>
-                <path id="circlePath" d="M50,50 m-34,0 a34,34 0 1,1 68,0 a34,34 0 1,1 -68,0" />
-              </defs>
-              <text fill="rgba(246,210,122,.92)" font-size="5.5" letter-spacing="1.4">
-                <textPath href="#circlePath" startOffset="0%">
-                  ✶ 乾 ✦ 坤 ✶ 離 ✦ 坎 ✶ 震 ✦ 巽 ✶ 艮 ✦ 兌 ✶
-                </textPath>
-              </text>
-            </svg>
-          </div>
+<div class="rune" id="rune"></div>
 
-          <div class="cup" id="cup1"></div>
-          <div class="cup" id="cup2"></div>
-        </div>
+<div class="cups">
+  <div class="cup" id="cup1"></div>
+  <div class="cup" id="cup2"></div>
+</div>
 
-        <div class="result" id="result">準備好了就按 <strong>擲筊</strong></div>
-        <div class="chips" id="chips"></div>
-      </div>
+<div class="result" id="result">靜心 · 擲筊</div>
+<div class="result-en" id="resultEn">Center yourself and cast the blocks</div>
 
-      <div class="footer">聖筊＝一正一反；陰筊＝兩反；笑筊＝兩正（象徵未定/不明）。</div>
-    </section>
+<button onclick="throwJiaobei()">擲筊 · Cast</button>
 
-    <aside class="card side">
-      <h2>🧾 擲筊紀錄</h2>
-      <p class="hint">每次擲筊會記下結果與時間。你也可以輸入問題，讓紀錄更清楚。</p>
-      <div class="list" id="history"></div>
-      <div class="footer">做成 GitHub Pages 後，掃 QR 就能直接使用。</div>
-    </aside>
-  </div>
+<div class="footer">
+Interactive Ritual Interface Design · 2026
+</div>
+
 </div>
 
 <script>
-  // ---- Wood-like impact sound (no external files) ----
-  const audioCtx = (() => {
-    try { return new (window.AudioContext || window.webkitAudioContext)(); }
-    catch { return null; }
-  })();
 
-  function woodHit(atTime, toneHz, decay){
-    if(!audioCtx) return;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    const f = audioCtx.createBiquadFilter();
+const cup1=document.getElementById("cup1");
+const cup2=document.getElementById("cup2");
+const result=document.getElementById("result");
+const resultEn=document.getElementById("resultEn");
+const rune=document.getElementById("rune");
 
-    o.type = 'triangle';
-    o.frequency.setValueAtTime(toneHz, atTime);
+function render(a,b){
+  cup1.innerHTML=`<img src="${a?'jiaobei_up.png':'jiaobei_down.png'}">`;
+  cup2.innerHTML=`<img src="${b?'jiaobei_up.png':'jiaobei_down.png'}">`;
+}
 
-    // bandpass to make it "wooden"
-    f.type = 'bandpass';
-    f.frequency.setValueAtTime(toneHz * 1.2, atTime);
-    f.Q.setValueAtTime(7, atTime);
+render(true,true);
 
-    g.gain.setValueAtTime(0.0001, atTime);
-    g.gain.exponentialRampToValueAtTime(0.22, atTime + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, atTime + decay);
+/* wood sound */
+const ctx=new (window.AudioContext||window.webkitAudioContext)();
 
-    o.connect(f);
-    f.connect(g);
-    g.connect(audioCtx.destination);
+function wood(){
+  const t=ctx.currentTime;
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.type="triangle";
+  o.frequency.setValueAtTime(380,t);
+  g.gain.setValueAtTime(0.25,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+  o.connect(g);
+  g.connect(ctx.destination);
+  o.start(t);
+  o.stop(t+0.3);
+}
 
-    o.start(atTime);
-    o.stop(atTime + decay + 0.02);
-  }
+function throwJiaobei(){
 
-  function knockNoise(atTime, dur){
-    if(!audioCtx) return;
-    const bufferSize = audioCtx.sampleRate * dur;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++){
-      // short, sharp noise burst
-      data[i] = (Math.random()*2-1) * Math.exp(-i/(bufferSize/6));
+  cup1.classList.add("throw");
+  cup2.classList.add("throw");
+  rune.classList.add("active");
+
+  setTimeout(()=>{
+    cup1.classList.remove("throw");
+    cup2.classList.remove("throw");
+  },1000);
+
+  setTimeout(()=>{
+
+    const a=Math.random()<0.5;
+    const b=Math.random()<0.5;
+    render(a,b);
+    wood();
+
+    if(a&&b){
+      result.innerText="笑筊";
+      resultEn.innerText="Ambiguous · The gods are smiling";
+    }else if(!a&&!b){
+      result.innerText="陰筊";
+      resultEn.innerText="No · Not granted";
+    }else{
+      result.innerText="聖筊";
+      resultEn.innerText="Yes · Permission granted";
     }
-    const src = audioCtx.createBufferSource();
-    src.buffer = buffer;
 
-    const hp = audioCtx.createBiquadFilter();
-    hp.type = 'highpass';
-    hp.frequency.setValueAtTime(900, atTime);
+    setTimeout(()=>rune.classList.remove("active"),1200);
 
-    const g = audioCtx.createGain();
-    g.gain.setValueAtTime(0.0001, atTime);
-    g.gain.exponentialRampToValueAtTime(0.12, atTime + 0.006);
-    g.gain.exponentialRampToValueAtTime(0.0001, atTime + dur);
+  },900);
+}
 
-    src.connect(hp); hp.connect(g); g.connect(audioCtx.destination);
-    src.start(atTime);
-    src.stop(atTime + dur + 0.02);
-  }
-
-  function playWoodDrops(){
-    const on = document.getElementById('soundToggle').checked;
-    if(!on || !audioCtx) return;
-
-    // iOS needs user gesture; button click already provides it
-    const t = audioCtx.currentTime + 0.01;
-
-    // 3 little impacts = like two cups bouncing
-    knockNoise(t + 0.00, 0.06);
-    woodHit(t + 0.00, 380, 0.12);
-
-    knockNoise(t + 0.10, 0.05);
-    woodHit(t + 0.10, 320, 0.14);
-
-    knockNoise(t + 0.22, 0.045);
-    woodHit(t + 0.22, 260, 0.16);
-  }
-
-  // --- SVG “杯筊” (one piece) ---
-  function cupSVG(faceUp=true){
-    const top = faceUp ? '#f7d78c' : '#b77a1f';
-    const mid = faceUp ? '#e0a83d' : '#7f4f10';
-    const glow = faceUp ? 'rgba(246,210,122,.28)' : 'rgba(0,0,0,.0)';
-
-    return `
-    <svg viewBox="0 0 240 240" role="img" aria-label="筊杯">
-      <defs>
-        <radialGradient id="g1" cx="40%" cy="30%" r="70%">
-          <stop offset="0%" stop-color="${top}"/>
-          <stop offset="55%" stop-color="${mid}"/>
-          <stop offset="100%" stop-color="#3a2410"/>
-        </radialGradient>
-        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.6" result="b"/>
-          <feMerge>
-            <feMergeNode in="b"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-
-      <ellipse cx="120" cy="170" rx="74" ry="28" fill="${glow}" filter="url(#soft)"/>
-
-      <path d="M55 150
-               C70 85, 170 85, 185 150
-               C168 172, 145 186, 120 186
-               C95 186, 72 172, 55 150Z"
-            fill="url(#g1)"
-            stroke="rgba(246,210,122,.25)"
-            stroke-width="2.2" />
-
-      <path d="M78 144
-               C90 105, 150 105, 162 144
-               C148 158, 136 166, 120 166
-               C104 166, 92 158, 78 144Z"
-            fill="rgba(255,255,255,.10)" />
-
-      <path d="M60 150 C78 92, 162 92, 180 150"
-            fill="none"
-            stroke="rgba(255,255,255,.18)"
-            stroke-width="3"
-            stroke-linecap="round"/>
-
-      <ellipse cx="120" cy="186" rx="56" ry="14" fill="rgba(0,0,0,.22)"/>
-    </svg>`;
-  }
-
-  const cup1 = document.getElementById('cup1');
-  const cup2 = document.getElementById('cup2');
-  const runes = document.getElementById('runes');
-  const resultEl = document.getElementById('result');
-  const chipsEl = document.getElementById('chips');
-  const historyEl = document.getElementById('history');
-  const qEl = document.getElementById('question');
-
-  function renderCups(aUp=true, bUp=true){
-    cup1.innerHTML = cupSVG(aUp);
-    cup2.innerHTML = cupSVG(bUp);
-  }
-  renderCups(true,true);
-
-  function nowStr(){
-    const d = new Date();
-    const pad = n => String(n).padStart(2,'0');
-    return `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
-
-  function interpret(aUp, bUp){
-    if(aUp && bUp) return {key:"笑筊", text:"😄 笑筊", desc:"象徵未定／神明微笑"};
-    if(!aUp && !bUp) return {key:"陰筊", text:"🌙 陰筊", desc:"不允／否"};
-    return {key:"聖筊", text:"✨ 聖筊", desc:"允許／是"};
-  }
-
-  const chipsMap = {
-    "聖筊": ["可行", "順勢", "可以前進"],
-    "陰筊": ["暫緩", "再想想", "此路不通"],
-    "笑筊": ["未定", "再問一次", "心未誠或時機未到"]
-  };
-
-  function setChips(key){
-    chipsEl.innerHTML = "";
-    for(const c of chipsMap[key] || []){
-      const span = document.createElement('span');
-      span.className = 'chip';
-      span.textContent = c;
-      chipsEl.appendChild(span);
-    }
-  }
-
-  function addHistory(question, info){
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML = `
-      <div class="q">${question ? "Q："+escapeHtml(question) : "Q：（未填）"}</div>
-      <div class="r">${info.text} <span style="font-weight:600;color:rgba(233,236,255,.75)">— ${info.desc}</span></div>
-      <div class="meta"><span>${nowStr()}</span><span>${info.key}</span></div>
-    `;
-    historyEl.prepend(div);
-  }
-
-  function escapeHtml(s){
-    return s.replace(/[&<>"']/g, (c) => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
-  }
-
-  function runeOn(){
-    runes.classList.add('on','spin');
-  }
-  function runeOff(){
-    runes.classList.remove('on','spin');
-  }
-
-  function throwJiaobei(){
-    // Animate throw
-    cup1.classList.remove('throwing'); cup2.classList.remove('throwing');
-    void cup1.offsetWidth;
-    cup1.classList.add('throwing');
-    cup2.classList.add('throwing');
-
-    // Rune appears during throw
-    runeOn();
-
-    // shuffle faces while throwing
-    const t0 = performance.now();
-    const shake = setInterval(() => {
-      renderCups(Math.random()<0.5, Math.random()<0.5);
-      if(performance.now() - t0 > 650) clearInterval(shake);
-    }, 90);
-
-    // Play wood drops near landing moment
-    setTimeout(() => playWoodDrops(), 640);
-
-    // settle result
-    const aUp = Math.random() < 0.5;
-    const bUp = Math.random() < 0.5;
-
-    setTimeout(() => {
-      renderCups(aUp, bUp);
-      const info = interpret(aUp, bUp);
-
-      resultEl.innerHTML = `結果：<strong>${info.text}</strong>　<span style="color:rgba(233,236,255,.78)">(${info.desc})</span>`;
-      setChips(info.key);
-      addHistory(qEl.value.trim(), info);
-
-      // keep rune a bit then fade
-      setTimeout(() => runeOff(), 1400);
-    }, 850);
-  }
-
-  document.getElementById('btnThrow').addEventListener('click', throwJiaobei);
-
-  document.getElementById('btnClear').addEventListener('click', () => {
-    historyEl.innerHTML = "";
-    qEl.value = "";
-    resultEl.innerHTML = `準備好了就按 <strong>擲筊</strong>`;
-    chipsEl.innerHTML = "";
-    renderCups(true,true);
-    runeOff();
-  });
 </script>
+
 </body>
 </html>
