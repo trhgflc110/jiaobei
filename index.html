@@ -10,11 +10,11 @@ html,body{
   margin:0;
   padding:0;
   height:100%;
-  font-family: "Helvetica Neue", system-ui, sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
   background:url("backgorund.jpg") no-repeat center center;
   background-size:cover;
-  color:white;
   overflow:hidden;
+  color:white;
 }
 
 /* dark overlay */
@@ -22,10 +22,10 @@ html,body{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,0.45);
-  backdrop-filter:blur(4px);
+  backdrop-filter:blur(3px);
 }
 
-/* main layout */
+/* layout */
 .container{
   position:relative;
   z-index:2;
@@ -40,7 +40,7 @@ html,body{
 
 /* title */
 .title{
-  font-size:28px;
+  font-size:26px;
   letter-spacing:2px;
   margin-bottom:4px;
 }
@@ -51,13 +51,13 @@ html,body{
   margin-bottom:40px;
 }
 
-/* rune circle */
+/* rune */
 .rune{
   position:absolute;
-  width:280px;
-  height:280px;
+  width:260px;
+  height:260px;
   border-radius:50%;
-  border:2px solid rgba(255,215,120,0.7);
+  border:2px solid rgba(255,215,120,0.6);
   box-shadow:0 0 40px rgba(255,215,120,0.6);
   animation:spin 8s linear infinite;
   opacity:0;
@@ -68,8 +68,8 @@ html,body{
 }
 
 @keyframes spin{
-  from{ transform:rotate(0deg);}
-  to{ transform:rotate(360deg);}
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
 }
 
 /* cups */
@@ -81,8 +81,8 @@ html,body{
 }
 
 .cup{
-  width:130px;
-  height:130px;
+  width:120px;
+  height:120px;
   transition:transform 1s cubic-bezier(.2,.8,.2,1);
 }
 
@@ -97,16 +97,16 @@ html,body{
 }
 
 @keyframes flip{
-  0%{ transform:rotate(0deg) translateY(0);}
-  40%{ transform:rotate(240deg) translateY(-50px);}
-  100%{ transform:rotate(360deg) translateY(0);}
+  0%{transform:rotate(0deg) translateY(0);}
+  40%{transform:rotate(240deg) translateY(-50px);}
+  100%{transform:rotate(360deg) translateY(0);}
 }
 
 /* result */
 .result{
-  font-size:24px;
+  font-size:22px;
   font-weight:600;
-  margin-bottom:8px;
+  margin-bottom:6px;
 }
 
 .result-en{
@@ -117,7 +117,7 @@ html,body{
 
 /* button */
 button{
-  padding:16px 48px;
+  padding:14px 44px;
   font-size:18px;
   border:none;
   border-radius:40px;
@@ -128,6 +128,7 @@ button{
   box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
+/* footer */
 .footer{
   position:absolute;
   bottom:20px;
