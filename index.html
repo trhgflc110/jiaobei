@@ -2,51 +2,87 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>擲筊</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jiaobei Divination Experience</title>
 
 <style>
 html,body{
   margin:0;
   padding:0;
   height:100%;
-  overflow:hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  font-family: "Helvetica Neue", system-ui, sans-serif;
   background:url("backgorund.jpg") no-repeat center center;
   background-size:cover;
   color:white;
+  overflow:hidden;
 }
 
-/* 暗化層 */
+/* dark overlay */
 .overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,0.45);
-  backdrop-filter:blur(3px);
+  backdrop-filter:blur(4px);
 }
 
-/* 中央容器 */
+/* main layout */
 .container{
   position:relative;
   z-index:2;
   height:100%;
   display:flex;
   flex-direction:column;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:20px;
 }
 
-/* 筊杯 */
+/* title */
+.title{
+  font-size:28px;
+  letter-spacing:2px;
+  margin-bottom:4px;
+}
+
+.subtitle{
+  font-size:14px;
+  opacity:0.8;
+  margin-bottom:40px;
+}
+
+/* rune circle */
+.rune{
+  position:absolute;
+  width:280px;
+  height:280px;
+  border-radius:50%;
+  border:2px solid rgba(255,215,120,0.7);
+  box-shadow:0 0 40px rgba(255,215,120,0.6);
+  animation:spin 8s linear infinite;
+  opacity:0;
+}
+
+.rune.active{
+  opacity:1;
+}
+
+@keyframes spin{
+  from{ transform:rotate(0deg);}
+  to{ transform:rotate(360deg);}
+}
+
+/* cups */
 .cups{
   display:flex;
-  gap:30px;
+  gap:40px;
   align-items:flex-end;
   margin-bottom:40px;
 }
 
 .cup{
-  width:120px;
-  height:120px;
+  width:130px;
+  height:130px;
   transition:transform 1s cubic-bezier(.2,.8,.2,1);
 }
 
@@ -56,56 +92,47 @@ html,body{
   object-fit:contain;
 }
 
-/* 旋轉動畫 */
 .throw{
-  animation:spin 1s ease;
+  animation:flip 1s ease;
 }
 
-@keyframes spin{
+@keyframes flip{
   0%{ transform:rotate(0deg) translateY(0);}
-  40%{ transform:rotate(220deg) translateY(-40px);}
+  40%{ transform:rotate(240deg) translateY(-50px);}
   100%{ transform:rotate(360deg) translateY(0);}
 }
 
-/* 符文光圈 */
-.rune{
-  position:absolute;
-  width:260px;
-  height:260px;
-  border-radius:50%;
-  border:2px solid rgba(255,215,120,0.6);
-  box-shadow:0 0 30px rgba(255,215,120,0.5);
-  animation:rotateRune 6s linear infinite;
-  opacity:0;
-}
-
-.rune.active{
-  opacity:1;
-}
-
-@keyframes rotateRune{
-  from{ transform:rotate(0deg);}
-  to{ transform:rotate(360deg);}
-}
-
-/* 結果文字 */
+/* result */
 .result{
-  font-size:26px;
-  font-weight:bold;
-  text-shadow:0 0 10px rgba(255,215,120,0.8);
+  font-size:24px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+.result-en{
+  font-size:14px;
+  opacity:0.8;
   margin-bottom:30px;
 }
 
-/* 按鈕 */
+/* button */
 button{
-  padding:16px 40px;
-  font-size:20px;
+  padding:16px 48px;
+  font-size:18px;
   border:none;
   border-radius:40px;
   background:linear-gradient(45deg,#d9a94b,#f6d27a);
   color:black;
   font-weight:bold;
-  box-shadow:0 10px 25px rgba(0,0,0,0.5);
+  letter-spacing:1px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+.footer{
+  position:absolute;
+  bottom:20px;
+  font-size:12px;
+  opacity:0.6;
 }
 </style>
 </head>
@@ -116,6 +143,9 @@ button{
 
 <div class="container">
 
+<div class="title">擲筊儀式體驗</div>
+<div class="subtitle">Jiaobei Divination Experience</div>
+
 <div class="rune" id="rune"></div>
 
 <div class="cups">
@@ -123,9 +153,14 @@ button{
   <div class="cup" id="cup2"></div>
 </div>
 
-<div class="result" id="result">靜心，按下擲筊</div>
+<div class="result" id="result">靜心 · 擲筊</div>
+<div class="result-en" id="resultEn">Center yourself and cast the blocks</div>
 
-<button onclick="throwJiaobei()">擲筊</button>
+<button onclick="throwJiaobei()">擲筊 · Cast</button>
+
+<div class="footer">
+Interactive Ritual Interface Design · 2026
+</div>
 
 </div>
 
@@ -134,6 +169,7 @@ button{
 const cup1=document.getElementById("cup1");
 const cup2=document.getElementById("cup2");
 const result=document.getElementById("result");
+const resultEn=document.getElementById("resultEn");
 const rune=document.getElementById("rune");
 
 function render(a,b){
@@ -143,21 +179,21 @@ function render(a,b){
 
 render(true,true);
 
-/* 木頭落地音 */
+/* wood sound */
 const ctx=new (window.AudioContext||window.webkitAudioContext)();
 
-function woodSound(){
+function wood(){
   const t=ctx.currentTime;
-  const osc=ctx.createOscillator();
-  const gain=ctx.createGain();
-  osc.type="triangle";
-  osc.frequency.setValueAtTime(400,t);
-  gain.gain.setValueAtTime(0.2,t);
-  gain.gain.exponentialRampToValueAtTime(0.001,t+0.3);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(t);
-  osc.stop(t+0.3);
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.type="triangle";
+  o.frequency.setValueAtTime(380,t);
+  g.gain.setValueAtTime(0.25,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+  o.connect(g);
+  g.connect(ctx.destination);
+  o.start(t);
+  o.stop(t+0.3);
 }
 
 function throwJiaobei(){
@@ -172,17 +208,21 @@ function throwJiaobei(){
   },1000);
 
   setTimeout(()=>{
+
     const a=Math.random()<0.5;
     const b=Math.random()<0.5;
     render(a,b);
-    woodSound();
+    wood();
 
     if(a&&b){
-      result.innerText="笑筊 😄";
+      result.innerText="笑筊";
+      resultEn.innerText="Ambiguous · The gods are smiling";
     }else if(!a&&!b){
-      result.innerText="陰筊 🌙";
+      result.innerText="陰筊";
+      resultEn.innerText="No · Not granted";
     }else{
-      result.innerText="聖筊 ✨";
+      result.innerText="聖筊";
+      resultEn.innerText="Yes · Permission granted";
     }
 
     setTimeout(()=>rune.classList.remove("active"),1200);
