@@ -2,484 +2,276 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Jiaobei Divination Experience</title>
 
 <style>
-  :root{
-    --gold: rgba(246, 210, 122, 0.95);
-    --gold2: rgba(217, 169, 75, 0.95);
-    --ink: rgba(255,255,255,0.92);
-    --muted: rgba(255,255,255,0.72);
-    --shadow: 0 18px 55px rgba(0,0,0,0.55);
-  }
+:root{
+  --gold: rgba(246,210,122,0.95);
+  --gold-soft: rgba(246,210,122,0.35);
+}
 
-  html,body{
-    height:100%;
-    margin:0;
-    overflow:hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", system-ui, sans-serif;
-    color: var(--ink);
-    background:#000;
-  }
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",system-ui,sans-serif;
+  color:white;
+  background:url("backgorund.jpg") center/cover no-repeat;
+}
 
-  /* Full background */
-  .bg{
-    position:fixed; inset:0;
-    background:url("backgorund.jpg") center/cover no-repeat;
-    transform: scale(1.03);
-    filter: saturate(1.05) contrast(1.03);
-  }
-  /* Dark glass overlay */
-  .shade{
-    position:fixed; inset:0;
-    background:
-      radial-gradient(900px 520px at 50% 35%, rgba(0,0,0,0.18), rgba(0,0,0,0.58)),
-      linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55));
-    backdrop-filter: blur(3px);
-  }
+/* dark overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(3px);
+}
 
-  /* Floating dust / smoke */
-  .mist{
-    position:fixed; inset:-10%;
-    pointer-events:none;
-    opacity:0.55;
-    background:
-      radial-gradient(220px 160px at 20% 20%, rgba(255,220,150,.10), transparent 65%),
-      radial-gradient(280px 180px at 80% 30%, rgba(255,240,210,.10), transparent 65%),
-      radial-gradient(240px 180px at 40% 80%, rgba(200,220,255,.08), transparent 70%),
-      radial-gradient(220px 160px at 70% 85%, rgba(255,220,150,.08), transparent 70%);
-    animation: mistDrift 14s ease-in-out infinite;
-    filter: blur(10px);
-  }
-  @keyframes mistDrift{
-    0%{ transform: translate3d(-1%, -1%, 0) scale(1); }
-    50%{ transform: translate3d(1.5%, 1.2%, 0) scale(1.02); }
-    100%{ transform: translate3d(-1%, -1%, 0) scale(1); }
-  }
+/* layout */
+.container{
+  position:relative;
+  z-index:2;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:20px;
+}
 
-  /* Main container */
-  .wrap{
-    position:relative;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding: env(safe-area-inset-top) 18px env(safe-area-inset-bottom) 18px;
-  }
+/* title */
+.title{
+  font-size:22px;
+  letter-spacing:3px;
+  margin-bottom:4px;
+}
 
-  .stage{
-    width:min(520px, 92vw);
-    text-align:center;
-    transform: translateY(6px);
-    animation: enter 900ms cubic-bezier(.2,.9,.2,1) both;
-  }
-  @keyframes enter{
-    from{ opacity:0; transform: translateY(24px) scale(.98); }
-    to{ opacity:1; transform: translateY(6px) scale(1); }
-  }
+.subtitle{
+  font-size:13px;
+  opacity:0.8;
+  margin-bottom:30px;
+}
 
-  .title{
-    font-size: 22px;
-    letter-spacing: .18em;
-    margin: 0 0 6px;
-    text-shadow: 0 10px 35px rgba(0,0,0,.5);
-  }
-  .subtitle{
-    margin:0 0 28px;
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: .08em;
-  }
+/* simple gold ring */
+.rune{
+  position:absolute;
+  width:min(320px,82vw);
+  aspect-ratio:1/1;
+  border-radius:50%;
+  border:2px solid rgba(255,215,120,0.7);
+  box-shadow:0 0 30px var(--gold-soft);
+  opacity:0;
+  pointer-events:none;
+}
 
-  /* Rune ring */
-  .rune{
-    position:absolute;
-    left:50%;
-    top: 43%;
-    transform: translate(-50%,-50%);
-    width:min(340px, 86vw);
-    aspect-ratio:1/1;
-    border-radius:999px;
-    opacity:0;
-    pointer-events:none;
-    filter: drop-shadow(0 18px 60px rgba(0,0,0,.45));
-  }
-  .rune::before{
-    content:"";
-    position:absolute; inset:0;
-    border-radius:999px;
-    background:
-      radial-gradient(circle at 50% 50%, rgba(246,210,122,.22), transparent 56%),
-      conic-gradient(from 0deg,
-        rgba(246,210,122,.0),
-        rgba(246,210,122,.55),
-        rgba(246,210,122,.0),
-        rgba(246,210,122,.45),
-        rgba(246,210,122,.0)
-      );
-    mask: radial-gradient(circle at 50% 50%, transparent 57%, black 58%, black 64%, transparent 65%);
-  }
-  .rune svg{ position:absolute; inset:0; width:100%; height:100%; }
-  .rune.on{
-    opacity:1;
-    animation: runePulse 1.7s ease-in-out infinite;
-  }
-  .rune.spin{
-    animation: runeSpin 6s linear infinite;
-  }
-  @keyframes runeSpin{
-    from { transform: translate(-50%,-50%) rotate(0deg); }
-    to   { transform: translate(-50%,-50%) rotate(360deg); }
-  }
-  @keyframes runePulse{
-    0%   { filter: drop-shadow(0 10px 35px rgba(246,210,122,.16)); }
-    50%  { filter: drop-shadow(0 18px 70px rgba(246,210,122,.26)); }
-    100% { filter: drop-shadow(0 10px 35px rgba(246,210,122,.16)); }
-  }
+.rune.active{
+  opacity:1;
+  animation:spin 6s linear infinite, pulse 1.6s ease-in-out infinite;
+}
 
-  /* Golden burst when result appears */
-  .burst{
-    position:absolute;
-    left:50%;
-    top:43%;
-    transform: translate(-50%,-50%);
-    width:min(420px, 95vw);
-    aspect-ratio: 1/1;
-    border-radius:999px;
-    pointer-events:none;
-    opacity:0;
-    background:
-      radial-gradient(circle at 50% 50%, rgba(246,210,122,.22), transparent 58%),
-      radial-gradient(circle at 50% 50%, rgba(246,210,122,.10), transparent 72%);
-    filter: blur(0.2px) drop-shadow(0 25px 80px rgba(246,210,122,.28));
-  }
-  .burst.show{
-    animation: burstPop 780ms cubic-bezier(.2,.9,.2,1) both;
-  }
-  @keyframes burstPop{
-    0%{ opacity:0; transform: translate(-50%,-50%) scale(.92); }
-    45%{ opacity:1; transform: translate(-50%,-50%) scale(1.02); }
-    100%{ opacity:0; transform: translate(-50%,-50%) scale(1.08); }
-  }
+@keyframes spin{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
 
-  /* Cups */
-  .cups{
-    display:flex;
-    justify-content:center;
-    align-items:flex-end;
-    gap: 34px;
-    margin: 6px 0 18px;
-    position:relative;
-  }
-  .cup{
-    width: min(140px, 34vw);
-    height: min(140px, 34vw);
-    filter: drop-shadow(0 18px 40px rgba(0,0,0,.55));
-    transform-origin: 50% 80%;
-    animation: floaty 4.4s ease-in-out infinite;
-  }
-  .cup:nth-child(2){ animation-delay: -1.8s; }
-  @keyframes floaty{
-    0%{ transform: translateY(0px); }
-    50%{ transform: translateY(-6px); }
-    100%{ transform: translateY(0px); }
-  }
-  .cup img{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    user-select:none;
-    -webkit-user-drag:none;
-  }
+@keyframes pulse{
+  0%{box-shadow:0 0 20px var(--gold-soft);}
+  50%{box-shadow:0 0 50px rgba(246,210,122,0.55);}
+  100%{box-shadow:0 0 20px var(--gold-soft);}
+}
 
-  /* Throw animation */
-  .throw{
-    animation: toss 1.05s cubic-bezier(.18,.8,.22,1) both !important;
-  }
-  @keyframes toss{
-    0%   { transform: translateY(0) rotate(0deg) scale(1); }
-    18%  { transform: translateY(-18px) rotate(35deg) scale(1.02); }
-    45%  { transform: translateY(-78px) rotate(240deg) scale(1.05); }
-    72%  { transform: translateY(10px) rotate(360deg) scale(1.0); }
-    84%  { transform: translateY(-6px) rotate(360deg) scale(1.0); }
-    100% { transform: translateY(0) rotate(360deg) scale(1); }
-  }
+/* cups */
+.cups{
+  display:flex;
+  gap:40px;
+  align-items:flex-end;
+  margin:20px 0;
+}
 
-  /* Result text */
-  .result{
-    margin: 6px 0 2px;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing:.10em;
-    text-shadow: 0 0 18px rgba(246,210,122,.22);
-    min-height: 30px;
-  }
-  .result-en{
-    margin: 0 0 18px;
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing:.06em;
-    min-height: 18px;
-  }
+.cup{
+  width:120px;
+  height:120px;
+  transform-origin:50% 80%;
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,0.6));
+}
 
-  /* Button */
-  .btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    padding: 14px 42px;
-    border-radius: 999px;
-    border: 1px solid rgba(246,210,122,.35);
-    background: linear-gradient(45deg, rgba(217,169,75,.92), rgba(246,210,122,.92));
-    color: rgba(10,10,14,.95);
-    font-weight: 800;
-    letter-spacing:.12em;
-    box-shadow: var(--shadow);
-    cursor:pointer;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .12s ease, filter .12s ease;
-  }
-  .btn:active{ transform: scale(.98); filter: brightness(.98); }
+.cup img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
 
-  /* Small footer */
-  .foot{
-    margin-top: 16px;
-    font-size: 11px;
-    color: rgba(255,255,255,.52);
-    letter-spacing:.06em;
-  }
+/* throw animation */
+.throw{
+  animation:toss 1.05s cubic-bezier(.18,.8,.22,1);
+}
 
-  /* Small screens */
-  @media (max-height: 680px){
-    .subtitle{ margin-bottom: 18px; }
-    .cups{ margin-top: 0; }
-  }
+@keyframes toss{
+  0%{transform:rotate(0deg) translateY(0);}
+  40%{transform:rotate(240deg) translateY(-70px);}
+  70%{transform:rotate(360deg) translateY(8px);}
+  100%{transform:rotate(360deg) translateY(0);}
+}
+
+/* gold flash */
+.flash{
+  position:absolute;
+  width:min(420px,90vw);
+  aspect-ratio:1/1;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(246,210,122,0.25), transparent 60%);
+  opacity:0;
+  pointer-events:none;
+}
+
+.flash.show{
+  animation:flashPop 800ms ease-out;
+}
+
+@keyframes flashPop{
+  0%{opacity:0; transform:scale(.9);}
+  40%{opacity:1; transform:scale(1);}
+  100%{opacity:0; transform:scale(1.1);}
+}
+
+/* result */
+.result{
+  font-size:22px;
+  font-weight:600;
+  margin-top:10px;
+}
+
+.result-en{
+  font-size:13px;
+  opacity:0.8;
+  margin-bottom:25px;
+}
+
+/* button */
+button{
+  padding:14px 44px;
+  font-size:16px;
+  border:none;
+  border-radius:40px;
+  background:linear-gradient(45deg,#d9a94b,#f6d27a);
+  color:black;
+  font-weight:bold;
+  letter-spacing:1px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+.footer{
+  position:absolute;
+  bottom:20px;
+  font-size:11px;
+  opacity:0.6;
+}
 </style>
 </head>
 
 <body>
-<div class="bg" id="bg"></div>
-<div class="shade"></div>
-<div class="mist"></div>
 
-<div class="wrap">
-  <div class="stage">
+<div class="overlay"></div>
 
-    <h1 class="title">擲筊儀式體驗</h1>
-    <p class="subtitle">Jiaobei Divination Experience</p>
+<div class="container">
 
-    <div class="rune" id="rune" aria-hidden="true">
-      <svg viewBox="0 0 100 100">
-        <defs>
-          <path id="circlePath" d="M50,50 m-34,0 a34,34 0 1,1 68,0 a34,34 0 1,1 -68,0" />
-        </defs>
-        <text fill="rgba(246,210,122,.92)" font-size="5.6" letter-spacing="1.6">
-          <textPath href="#circlePath" startOffset="0%">
-            ✶ 乾 ✦ 坤 ✶ 離 ✦ 坎 ✶ 震 ✦ 巽 ✶ 艮 ✦ 兌 ✶
-          </textPath>
-        </text>
-      </svg>
-    </div>
+<div class="title">擲筊儀式體驗</div>
+<div class="subtitle">Jiaobei Divination Experience</div>
 
-    <div class="burst" id="burst" aria-hidden="true"></div>
+<div class="rune" id="rune"></div>
+<div class="flash" id="flash"></div>
 
-    <div class="cups" aria-label="Jiaobei blocks">
-      <div class="cup" id="cup1"></div>
-      <div class="cup" id="cup2"></div>
-    </div>
+<div class="cups">
+  <div class="cup" id="cup1"></div>
+  <div class="cup" id="cup2"></div>
+</div>
 
-    <div class="result" id="result">靜心 · 擲筊</div>
-    <div class="result-en" id="resultEn">Center yourself and cast the blocks</div>
+<div class="result" id="result">靜心 · 擲筊</div>
+<div class="result-en" id="resultEn">Center yourself and cast the blocks</div>
 
-    <div class="btn" id="btn">擲筊 · CAST</div>
+<button onclick="throwJiaobei()">擲筊 · CAST</button>
 
-    <div class="foot">Interactive Ritual UI · Portfolio Edition</div>
-  </div>
+<div class="footer">Interactive Ritual UI · Portfolio Edition</div>
+
 </div>
 
 <script>
-  // --- Elements ---
-  const cup1 = document.getElementById("cup1");
-  const cup2 = document.getElementById("cup2");
-  const rune = document.getElementById("rune");
-  const burst = document.getElementById("burst");
-  const result = document.getElementById("result");
-  const resultEn = document.getElementById("resultEn");
-  const btn = document.getElementById("btn");
-  const bg = document.getElementById("bg");
 
-  // --- Render cups by images ---
-  function render(aUp, bUp){
-    cup1.innerHTML = `<img src="${aUp ? 'jiaobei_up.png' : 'jiaobei_down.png'}" alt="jiaobei">`;
-    cup2.innerHTML = `<img src="${bUp ? 'jiaobei_up.png' : 'jiaobei_down.png'}" alt="jiaobei">`;
-  }
-  render(true, true);
+const cup1=document.getElementById("cup1");
+const cup2=document.getElementById("cup2");
+const rune=document.getElementById("rune");
+const flash=document.getElementById("flash");
+const result=document.getElementById("result");
+const resultEn=document.getElementById("resultEn");
 
-  // --- Small parallax (subtle, premium) ---
-  let px=0, py=0;
-  window.addEventListener('pointermove', (e)=>{
-    const x = (e.clientX / window.innerWidth) - 0.5;
-    const y = (e.clientY / window.innerHeight) - 0.5;
-    px = x; py = y;
-  }, {passive:true});
+function render(a,b){
+  cup1.innerHTML=`<img src="${a?'jiaobei_up.png':'jiaobei_down.png'}">`;
+  cup2.innerHTML=`<img src="${b?'jiaobei_up.png':'jiaobei_down.png'}">`;
+}
 
-  function raf(){
-    // tiny movement to avoid nausea
-    bg.style.transform = `scale(1.04) translate(${px*8}px, ${py*8}px)`;
-    requestAnimationFrame(raf);
-  }
-  raf();
+render(true,true);
 
-  // --- Audio: wood-like multi-hit (no external files) ---
-  const audioCtx = (() => {
-    try { return new (window.AudioContext || window.webkitAudioContext)(); }
-    catch { return null; }
-  })();
+/* wood sound */
+const ctx=new (window.AudioContext||window.webkitAudioContext)();
 
-  function noiseBurst(atTime, dur){
-    if(!audioCtx) return;
-    const length = Math.floor(audioCtx.sampleRate * dur);
-    const buffer = audioCtx.createBuffer(1, length, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<length;i++){
-      data[i] = (Math.random()*2-1) * Math.exp(-i/(length/6));
-    }
-    const src = audioCtx.createBufferSource();
-    src.buffer = buffer;
+function wood(){
+  const t=ctx.currentTime;
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.type="triangle";
+  o.frequency.setValueAtTime(380,t);
+  g.gain.setValueAtTime(0.3,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+  o.connect(g);
+  g.connect(ctx.destination);
+  o.start(t);
+  o.stop(t+0.3);
+}
 
-    const hp = audioCtx.createBiquadFilter();
-    hp.type = 'highpass';
-    hp.frequency.setValueAtTime(900, atTime);
+function throwJiaobei(){
 
-    const g = audioCtx.createGain();
-    g.gain.setValueAtTime(0.0001, atTime);
-    g.gain.exponentialRampToValueAtTime(0.11, atTime + 0.006);
-    g.gain.exponentialRampToValueAtTime(0.0001, atTime + dur);
+  if(navigator.vibrate) navigator.vibrate([20,30,20]);
 
-    src.connect(hp); hp.connect(g); g.connect(audioCtx.destination);
-    src.start(atTime);
-    src.stop(atTime + dur + 0.02);
-  }
+  cup1.classList.add("throw");
+  cup2.classList.add("throw");
+  rune.classList.add("active");
 
-  function woodTone(atTime, hz, decay){
-    if(!audioCtx) return;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    const bp = audioCtx.createBiquadFilter();
+  setTimeout(()=>{
+    cup1.classList.remove("throw");
+    cup2.classList.remove("throw");
+  },1000);
 
-    o.type = 'triangle';
-    o.frequency.setValueAtTime(hz, atTime);
+  setTimeout(()=>{
 
-    bp.type = 'bandpass';
-    bp.frequency.setValueAtTime(hz * 1.25, atTime);
-    bp.Q.setValueAtTime(7.5, atTime);
+    const a=Math.random()<0.5;
+    const b=Math.random()<0.5;
+    render(a,b);
+    wood();
 
-    g.gain.setValueAtTime(0.0001, atTime);
-    g.gain.exponentialRampToValueAtTime(0.22, atTime + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, atTime + decay);
+    flash.classList.remove("show");
+    void flash.offsetWidth;
+    flash.classList.add("show");
 
-    o.connect(bp); bp.connect(g); g.connect(audioCtx.destination);
-    o.start(atTime);
-    o.stop(atTime + decay + 0.02);
-  }
-
-  function playWoodLanding(){
-    if(!audioCtx) return;
-    const t = audioCtx.currentTime + 0.01;
-
-    // 3 hits, like bouncing
-    noiseBurst(t + 0.00, 0.060); woodTone(t + 0.00, 380, 0.12);
-    noiseBurst(t + 0.10, 0.050); woodTone(t + 0.10, 320, 0.14);
-    noiseBurst(t + 0.22, 0.045); woodTone(t + 0.22, 260, 0.16);
-  }
-
-  // --- Logic ---
-  // 聖筊：一正一反；陰筊：兩反；笑筊：兩正
-  function interpret(aUp, bUp){
-    if(aUp && bUp) return { zh:"笑筊", en:"Ambiguous · The gods are smiling" };
-    if(!aUp && !bUp) return { zh:"陰筊", en:"No · Not granted" };
-    return { zh:"聖筊", en:"Yes · Permission granted" };
-  }
-
-  // --- Premium visual cues ---
-  function runeOn(){
-    rune.classList.add("on","spin");
-  }
-  function runeOff(){
-    rune.classList.remove("on","spin");
-  }
-  function burstPop(){
-    burst.classList.remove("show");
-    void burst.offsetWidth;
-    burst.classList.add("show");
-  }
-
-  let busy = false;
-
-  function throwJiaobei(){
-    if(busy) return;
-    busy = true;
-
-    // resume audio (iOS)
-    if(audioCtx && audioCtx.state === "suspended"){
-      audioCtx.resume().catch(()=>{});
+    if(a&&b){
+      result.innerText="笑筊";
+      resultEn.innerText="Ambiguous · The gods are smiling";
+    }else if(!a&&!b){
+      result.innerText="陰筊";
+      resultEn.innerText="No · Not granted";
+    }else{
+      result.innerText="聖筊";
+      resultEn.innerText="Yes · Permission granted";
     }
 
-    // haptic
-    if(navigator.vibrate) navigator.vibrate([18, 24, 18]);
+    setTimeout(()=>rune.classList.remove("active"),1200);
 
-    // start visuals
-    runeOn();
-    result.textContent = "擲筊中…";
-    resultEn.textContent = "Casting…";
+  },900);
+}
 
-    // animate cups
-    cup1.classList.remove("throw"); cup2.classList.remove("throw");
-    void cup1.offsetWidth;
-    cup1.classList.add("throw");
-    cup2.classList.add("throw");
-
-    // shuffle during throw (adds realism)
-    const t0 = performance.now();
-    const shake = setInterval(()=>{
-      render(Math.random()<0.5, Math.random()<0.5);
-      if(performance.now() - t0 > 640) clearInterval(shake);
-    }, 90);
-
-    // landing sound near landing moment
-    setTimeout(()=> playWoodLanding(), 660);
-
-    // final settle
-    const aUp = Math.random() < 0.5;
-    const bUp = Math.random() < 0.5;
-
-    setTimeout(()=>{
-      render(aUp, bUp);
-      const r = interpret(aUp, bUp);
-
-      burstPop();
-
-      // Slightly different glow by result
-      result.textContent = r.zh;
-      resultEn.textContent = r.en;
-
-      // keep rune a bit then fade
-      setTimeout(()=> runeOff(), 1200);
-
-      busy = false;
-    }, 900);
-  }
-
-  btn.addEventListener("click", throwJiaobei);
-
-  // Optional: tap anywhere to cast (nice on mobile)
-  document.body.addEventListener("dblclick", (e)=>{
-    e.preventDefault();
-    throwJiaobei();
-  }, {passive:false});
 </script>
+
 </body>
 </html>
